@@ -1,5 +1,5 @@
 package com.example.signalandlocation;
-//asdasdasd
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
