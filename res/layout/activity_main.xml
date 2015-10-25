@@ -58,5 +58,17 @@
         android:layout_height="wrap_content"
         android:text="@string/button_send" 
         android:onClick="sData"/>
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_strtService" 
+        android:onClick="startService"/>
+   
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_stpService" 
+        android:onClick="stopService"/>
 
 </LinearLayout>

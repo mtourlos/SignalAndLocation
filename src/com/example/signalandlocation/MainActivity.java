@@ -4,7 +4,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Criteria;
@@ -12,9 +17,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -62,6 +71,7 @@ public class MainActivity extends Activity implements LocationListener{
 	String response;
 	String timestamp;
 	
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	
@@ -69,15 +79,7 @@ public class MainActivity extends Activity implements LocationListener{
 
 		//load settings
 		loadSettings();
-		//check if the gps provider is enabled
-		LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
-		boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		if (!enabled) {
-			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-			startActivity(intent);
-			Toast.makeText(this, "GPS must be enabled!!!",Toast.LENGTH_SHORT).show();
-		} 
-		
+				
 		setContentView(R.layout.activity_main);
 		latituteField = (TextView) findViewById(R.id.lat);
 	    longitudeField = (TextView) findViewById(R.id.lon);
@@ -149,13 +151,7 @@ public class MainActivity extends Activity implements LocationListener{
 	@Override
 	protected void onResume(){
 	      super.onResume();
-	      LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
-	      boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			if (!enabled) {
-				Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-				startActivity(intent);
-				Toast.makeText(this, "GPS must be enabled!!!",Toast.LENGTH_SHORT).show();
-			} 
+	      checkGPS();
 	      Tel.listen(SignalStrengthListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 	      locationManager.requestLocationUpdates(provider, 400, 1, this);
 	      
@@ -316,6 +312,81 @@ public class MainActivity extends Activity implements LocationListener{
     	
     }
     
+    public void startService (View v){
+    	notificationBuild();
+    	//Intent intent = new Intent(this, TestService.class);
+    	//startService(intent);
+    }
+    
+    public void stopService (View v){
+    	notificationDestroy();
+    	//Intent intent = new Intent(this, TestService.class);
+    	//stopService(intent);
+    }
+    
+    private void checkGPS (){
+    	LocationManager lmService = (LocationManager) getSystemService(LOCATION_SERVICE);
+    	boolean enabled = lmService.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		if (!enabled) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.main_alerDialog_message)
+				   .setTitle(R.string.main_alerDialog_title);
+			builder.setPositiveButton(R.string.enable, new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User clicked OK button
+		        	   Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+		        	   startActivity(intent);
+		           }
+		       });
+		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User cancelled the dialog
+		        	   System.exit(0);
+		           }
+		       });
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		} 
+    }
+    
+    private void notificationBuild (){
+    	NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+    	mBuilder.setSmallIcon(R.drawable.ic_launcher);
+    	mBuilder.setContentTitle("Notification Alert, Click Me!");
+    	mBuilder.setContentText("Hi, This is Android Notification Detail!");
+    	mBuilder.setOngoing(true);
+    	
+    	Intent resultIntent = new Intent(this, MainActivity.class);
+    	TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+    	stackBuilder.addParentStack(MainActivity.class);
+
+    	// Adds the Intent that starts the Activity to the top of the stack
+    	stackBuilder.addNextIntent(resultIntent);
+    	PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
+    	mBuilder.setContentIntent(resultPendingIntent);
+    	
+    	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
+    	int notificationID=0;
+		// notificationID allows you to update the notification later on.
+    	mNotificationManager.notify(notificationID, mBuilder.build());
+    	
+    	try {
+    	    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    	    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+    	    r.play();
+    	} catch (Exception e) {
+    	    e.printStackTrace();
+    	}
+    	
+    	
+    	
+    }
+    
+    private void notificationDestroy (){
+    	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    	mNotificationManager.cancel(0);
+    }
 
    
 }
