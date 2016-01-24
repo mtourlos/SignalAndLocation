@@ -1,17 +1,23 @@
 package com.example.signalandlocation;
 
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.Date;
+
+import com.example.signalandlocation.DataContract.DataEntry;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -70,6 +76,13 @@ public class MainActivity extends Activity implements LocationListener{
 	String networkTypeString;
 	String response;
 	String timestamp;
+	float lat;
+	float lng;
+	
+	//dbHelper
+	DataDbHelper mDbHelper;
+	
+	
 	
 		
 	@Override
@@ -79,6 +92,9 @@ public class MainActivity extends Activity implements LocationListener{
 
 		//load settings
 		loadSettings();
+		
+		//dbHelper
+		mDbHelper = new DataDbHelper(getBaseContext());
 				
 		setContentView(R.layout.activity_main);
 		latituteField = (TextView) findViewById(R.id.lat);
@@ -188,8 +204,8 @@ public class MainActivity extends Activity implements LocationListener{
     
     
     public void onLocationChanged(Location location) {
-        float lat = (float) (location.getLatitude());
-        float lng = (float) (location.getLongitude());
+        lat = (float) (location.getLatitude());
+        lng = (float) (location.getLongitude());
         latituteField.setText("Latitude: "+String.valueOf(lat));
         longitudeField.setText("Longtitude: "+String.valueOf(lng));
       
@@ -333,8 +349,8 @@ public class MainActivity extends Activity implements LocationListener{
      */
     public void startService (View v){
     	notificationBuild();
-    	//Intent intent = new Intent(this, TestService.class);
-    	//startService(intent);
+    	Intent intent = new Intent(this, TestService.class);
+    	startService(intent);
     }
     
     /**
@@ -343,8 +359,8 @@ public class MainActivity extends Activity implements LocationListener{
      */
     public void stopService (View v){
     	notificationDestroy();
-    	//Intent intent = new Intent(this, TestService.class);
-    	//stopService(intent);
+    	Intent intent = new Intent(this, TestService.class);
+    	stopService(intent);
     }
     
     /**
@@ -420,6 +436,59 @@ public class MainActivity extends Activity implements LocationListener{
     	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     	mNotificationManager.cancel(0);
     }
-
+    
+    /**
+     * Stores pilot Data for test
+     * @param v
+     */
+    public void storePilotData(View v){
+    	SQLiteDatabase db =  mDbHelper.getWritableDatabase();
+    	ContentValues values = new ContentValues();
+    	values.put(DataEntry.TIME_STAMP, getCurrentTimeStamp());
+    	values.put(DataEntry.USER, activeUser);
+    	values.put(DataEntry.OPERATOR, operatorName);
+    	values.put(DataEntry.CINR, signalStrength );
+    	values.put(DataEntry.LATITUDE, String.valueOf(lat));
+    	values.put(DataEntry.LATITUDE, String.valueOf(lng));
+    	//missing network type
+    	long newRowId;
+    	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
+    	Toast.makeText(getApplicationContext(), "Data Stored in local db", Toast.LENGTH_SHORT).show();
+    }
    
+    /**
+     * Displays some data from local db
+     * @param v
+     */
+    public void loadLocalDb(View v){
+    	SQLiteDatabase db = mDbHelper.getReadableDatabase();
+    	String[] projection = {
+    		    DataEntry.TIME_STAMP,
+    		    DataEntry.USER,
+    		    DataEntry.CINR
+    		    };
+    	String sortOrder =
+    		    DataEntry.TIME_STAMP + " DESC";
+    	
+    	Cursor cursor = db.query(
+    		    DataEntry.TABLE_NAME,  // The table to query
+    		    projection,                               // The columns to return
+    		    null,                                // The columns for the WHERE clause
+    		    null,                            // The values for the WHERE clause
+    		    null,                                     // don't group the rows
+    		    null,                                     // don't filter by row groups
+    		    sortOrder                                 // The sort order
+    		    );
+    	
+    	cursor.moveToFirst();
+    	String itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
+    	String itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
+    	String itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
+    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
+    	cursor.moveToLast();
+    	itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
+    	itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
+    	itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
+    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
+    }
 }

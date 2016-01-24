@@ -7,6 +7,8 @@
     <string name="button_send">Send</string>
     <string name="button_strtService">Start Test Service</string>
     <string name="button_stpService">Stop Test Service</string>
+    <string name="button_storeData">Store to local DB</string>
+    <string name="button_previewData">Store to local DB</string>
     <string name="settings_server_category_title">Server Information</string>
     <string name="settings_server_ip_address">Ip Address</string>
     <string name="settings_server_ip_address_comment">Ip address of server</string>

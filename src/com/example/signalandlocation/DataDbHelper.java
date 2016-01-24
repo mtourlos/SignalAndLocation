@@ -19,7 +19,7 @@ public class DataDbHelper extends SQLiteOpenHelper  {
 			 DataEntry.OPERATOR + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +	
 			 DataEntry.LATITUDE + TEXT_TYPE + COMMA_SEP +	
-			 DataEntry.LONGTITUDE + TEXT_TYPE + COMMA_SEP + " )";
+			 DataEntry.LONGTITUDE + TEXT_TYPE + " )";
 	 private static final String SQL_DELETE_ENTRIES =   
 			 "DROP TABLE IF EXISTS " + DataEntry.TABLE_NAME;
 	 

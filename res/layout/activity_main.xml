@@ -70,5 +70,17 @@
         android:layout_height="wrap_content"
         android:text="@string/button_stpService" 
         android:onClick="stopService"/>
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_storeData" 
+        android:onClick="storePilotData"/>
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_previewData" 
+        android:onClick="loadLocalDb"/>
 
 </LinearLayout>
