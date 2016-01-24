@@ -293,7 +293,10 @@ public class MainActivity extends Activity implements LocationListener{
     }
     
     public void sData (View v){
-    	WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK,this,response);
+    	
+    	
+    	
+    	/*WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK,this,response);
     	Location location = locationManager.getLastKnownLocation(provider);
     	String timeStamp = getCurrentTimeStamp();
     	String user = activeUser;
@@ -308,7 +311,7 @@ public class MainActivity extends Activity implements LocationListener{
     	wst.addNameValuePair("latitude",Float.toString(lat));
     	wst.addNameValuePair("longtitude",Float.toString(lon));
     	
-    	wst.execute("http://" + serverIp + ":8080/TalosServer/service/userservice/datas");
+    	wst.execute("http://" + serverIp + ":8080/TalosServer/service/userservice/datas");*/
     	
     }
     
