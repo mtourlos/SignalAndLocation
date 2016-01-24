@@ -226,6 +226,10 @@ public class MainActivity extends Activity implements LocationListener{
         }
     }
     
+    /**
+     * Translates network id to string for ui
+     * @return network type to string
+     */
     public String getNetworkType(){
     	int networkType;
     	String result=null;
@@ -284,6 +288,10 @@ public class MainActivity extends Activity implements LocationListener{
     	return result;
     }
     
+    /**
+     * Loads users settings from settings.xml
+     * @return true in order to triggers changes and display them
+     */
     public boolean loadSettings(){
     	SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     	serverIp=sharedPrefs.getString(MainActivity.KEY_PREF_SERVER_IP, "");
@@ -292,6 +300,10 @@ public class MainActivity extends Activity implements LocationListener{
 
     }
     
+    /**
+     * Sends single Data to Server
+     * @param v
+     */
     public void sData (View v){
     	
     	
@@ -315,18 +327,29 @@ public class MainActivity extends Activity implements LocationListener{
     	
     }
     
+    /**
+     * Starts the StoreLocationService
+     * @param v
+     */
     public void startService (View v){
     	notificationBuild();
     	//Intent intent = new Intent(this, TestService.class);
     	//startService(intent);
     }
     
+    /**
+     * Stops the StoreLocationService
+     * @param v
+     */
     public void stopService (View v){
     	notificationDestroy();
     	//Intent intent = new Intent(this, TestService.class);
     	//stopService(intent);
     }
     
+    /**
+     * Checks whether GPS provides is enabled and if is not prompts an AlertDialog
+     */
     private void checkGPS (){
     	LocationManager lmService = (LocationManager) getSystemService(LOCATION_SERVICE);
     	boolean enabled = lmService.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -352,11 +375,15 @@ public class MainActivity extends Activity implements LocationListener{
 		} 
     }
     
+    /**
+     * Builds notification for the SroreLocationService
+     */
+    
     private void notificationBuild (){
     	NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
     	mBuilder.setSmallIcon(R.drawable.ic_launcher);
-    	mBuilder.setContentTitle("Notification Alert, Click Me!");
-    	mBuilder.setContentText("Hi, This is Android Notification Detail!");
+    	mBuilder.setContentTitle("Talos");
+    	mBuilder.setContentText("Talos service is now up and running!");
     	mBuilder.setOngoing(true);
     	
     	Intent resultIntent = new Intent(this, MainActivity.class);
@@ -386,6 +413,9 @@ public class MainActivity extends Activity implements LocationListener{
     	
     }
     
+    /**
+     * Destroys notification for the StoreLocationService
+     */
     private void notificationDestroy (){
     	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     	mNotificationManager.cancel(0);
