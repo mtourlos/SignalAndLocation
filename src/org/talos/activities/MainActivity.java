@@ -1,10 +1,12 @@
-package com.example.signalandlocation;
+package org.talos.activities;
 
 import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 
-import com.example.signalandlocation.DataContract.DataEntry;
+import org.talos.activities.DataContract.DataEntry;
+
+import com.example.signalandlocation.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -451,7 +453,6 @@ public class MainActivity extends Activity implements LocationListener{
     	values.put(DataEntry.NETWORK_TYPE, getNetworkType());
     	values.put(DataEntry.LATITUDE, String.valueOf(lat));
     	values.put(DataEntry.LATITUDE, String.valueOf(lng));
-    	//missing network type
     	long newRowId;
     	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
     	Toast.makeText(getApplicationContext(), "Data Stored in local db", Toast.LENGTH_SHORT).show();

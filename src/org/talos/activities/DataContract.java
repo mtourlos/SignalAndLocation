@@ -1,4 +1,4 @@
-package com.example.signalandlocation;
+package org.talos.activities;
 
 import android.provider.BaseColumns;
 	

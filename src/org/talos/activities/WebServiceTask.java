@@ -1,4 +1,4 @@
-package com.example.signalandlocation;
+package org.talos.activities;
 
 
 import java.io.BufferedReader;

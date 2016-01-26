@@ -1,6 +1,6 @@
-package com.example.signalandlocation;
+package org.talos.activities;
 
-import com.example.signalandlocation.DataContract.DataEntry;
+import org.talos.activities.DataContract.DataEntry;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

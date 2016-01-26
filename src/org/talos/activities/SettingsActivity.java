@@ -1,4 +1,4 @@
-package com.example.signalandlocation;
+package org.talos.activities;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -18,6 +18,8 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
 import java.util.List;
+
+import com.example.signalandlocation.R;
 
 
 public class SettingsActivity extends PreferenceActivity {

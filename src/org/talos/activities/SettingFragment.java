@@ -1,4 +1,6 @@
-package com.example.signalandlocation;
+package org.talos.activities;
+
+import com.example.signalandlocation.R;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
