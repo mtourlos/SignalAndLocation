@@ -14,6 +14,7 @@ public final class DataContract {
 		public static final String USER="user";
 		public static final String OPERATOR="operator";
 		public static final String CINR="cinr";
+		public static final String NETWORK_TYPE="netowork_type";
 		public static final String LATITUDE="latidute";
 		public static final String LONGTITUDE="longtidute";
 		

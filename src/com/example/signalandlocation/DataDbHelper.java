@@ -17,7 +17,8 @@ public class DataDbHelper extends SQLiteOpenHelper  {
 			 DataEntry.TIME_STAMP + " " + TEXT_TYPE + " PRIMARY KEY," +
 			 DataEntry.USER + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.OPERATOR + TEXT_TYPE + COMMA_SEP +
-			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +	
+			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +
+			 DataEntry.NETWORK_TYPE + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.LATITUDE + TEXT_TYPE + COMMA_SEP +	
 			 DataEntry.LONGTITUDE + TEXT_TYPE + " )";
 	 private static final String SQL_DELETE_ENTRIES =   

@@ -324,7 +324,7 @@ public class MainActivity extends Activity implements LocationListener{
     	
     	
     	
-    	/*WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK,this,response);
+    	WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK,this,response);
     	Location location = locationManager.getLastKnownLocation(provider);
     	String timeStamp = getCurrentTimeStamp();
     	String user = activeUser;
@@ -339,7 +339,7 @@ public class MainActivity extends Activity implements LocationListener{
     	wst.addNameValuePair("latitude",Float.toString(lat));
     	wst.addNameValuePair("longtitude",Float.toString(lon));
     	
-    	wst.execute("http://" + serverIp + ":8080/TalosServer/service/userservice/datas");*/
+    	wst.execute("http://" + serverIp + ":8080/TalosServer/service/userservice/datas");
     	
     }
     
@@ -448,6 +448,7 @@ public class MainActivity extends Activity implements LocationListener{
     	values.put(DataEntry.USER, activeUser);
     	values.put(DataEntry.OPERATOR, operatorName);
     	values.put(DataEntry.CINR, signalStrength );
+    	values.put(DataEntry.NETWORK_TYPE, getNetworkType());
     	values.put(DataEntry.LATITUDE, String.valueOf(lat));
     	values.put(DataEntry.LATITUDE, String.valueOf(lng));
     	//missing network type
