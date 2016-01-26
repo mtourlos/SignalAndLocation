@@ -31,7 +31,10 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <service 
-            android:name="org.talos.activities.TestService"
+            android:name="org.talos.services.IntentTestService"
+        />
+        <service 
+            android:name="org.talos.services.TestService"
         />
     </application>
     

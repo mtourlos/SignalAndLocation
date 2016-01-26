@@ -5,6 +5,8 @@ import java.util.Currency;
 import java.util.Date;
 
 import org.talos.activities.DataContract.DataEntry;
+import org.talos.services.IntentTestService;
+import org.talos.services.TestService;
 
 import com.example.signalandlocation.R;
 
@@ -65,6 +67,8 @@ public class MainActivity extends Activity implements LocationListener{
 	private TextView timestampField;
 	private TextView latituteField;
 	private TextView longitudeField;
+	private TextView latituteFieldService;
+	private TextView longitudeFieldService;
 	private TextView signalStrengthField;
 	private TextView operatorNameField;
 	private TextView networkTypeField;
@@ -101,6 +105,8 @@ public class MainActivity extends Activity implements LocationListener{
 		setContentView(R.layout.activity_main);
 		latituteField = (TextView) findViewById(R.id.lat);
 	    longitudeField = (TextView) findViewById(R.id.lon);
+	    latituteFieldService = (TextView) findViewById(R.id.service_lat);
+	    longitudeFieldService = (TextView) findViewById(R.id.service_lon);
 	    operatorNameField = (TextView) findViewById(R.id.operator_name);
 	    timestampField = (TextView) findViewById(R.id.timestamp);
 	    serverIpField = (TextView) findViewById(R.id.server_ip);
@@ -127,10 +133,10 @@ public class MainActivity extends Activity implements LocationListener{
         if (location != null) {
             System.out.println("Provider " + provider + " has been selected.");
             onLocationChanged(location);
-          } else {
+        } else {
             latituteField.setText("Latitute: Location not available");
             longitudeField.setText("Longtitude: Location not available");
-          }
+        }
     	
 	}
 
@@ -210,6 +216,9 @@ public class MainActivity extends Activity implements LocationListener{
         lng = (float) (location.getLongitude());
         latituteField.setText("Latitude: "+String.valueOf(lat));
         longitudeField.setText("Longtitude: "+String.valueOf(lng));
+        //latituteFieldService.setText("Latitude: "+LocationService.getLatitude());
+        //longitudeFieldService.setText("Longtitude: "+LocationService.getLongtitude());
+        
       
     }
 
