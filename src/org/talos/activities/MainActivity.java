@@ -15,10 +15,12 @@ import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -34,6 +36,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -44,7 +47,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements LocationListener{
+public class MainActivity extends Activity{
 	
 	public static final String KEY_PREF_ACTIVE_USER = "settings_active_user";
 	public static final String KEY_PREF_SERVER_IP="settings_server_ip";
@@ -54,8 +57,8 @@ public class MainActivity extends Activity implements LocationListener{
 	MyPhoneStateListener    SignalStrengthListener;
 	
 	//location listener
-	LocationManager			locationManager;
-	private String 			provider;
+	//LocationManager			locationManager;
+	//private String 			provider;
 	
 	//network type
 	private String networkType;
@@ -67,8 +70,6 @@ public class MainActivity extends Activity implements LocationListener{
 	private TextView timestampField;
 	private TextView latituteField;
 	private TextView longitudeField;
-	private TextView latituteFieldService;
-	private TextView longitudeFieldService;
 	private TextView signalStrengthField;
 	private TextView operatorNameField;
 	private TextView networkTypeField;
@@ -77,16 +78,22 @@ public class MainActivity extends Activity implements LocationListener{
 	String activeUser;
 	String serverIp;
 	
+	//broadcastReceiver
+	BroadcastReceiver locationBrReceiver;
+	
 	int signalStrength;
 	String operatorName;
 	String networkTypeString;
 	String response;
 	String timestamp;
 	float lat;
-	float lng;
+	float lon;
 	
 	//dbHelper
 	DataDbHelper mDbHelper;
+	
+	//test
+	TestService ts = new TestService();
 	
 	
 	
@@ -105,8 +112,6 @@ public class MainActivity extends Activity implements LocationListener{
 		setContentView(R.layout.activity_main);
 		latituteField = (TextView) findViewById(R.id.lat);
 	    longitudeField = (TextView) findViewById(R.id.lon);
-	    latituteFieldService = (TextView) findViewById(R.id.service_lat);
-	    longitudeFieldService = (TextView) findViewById(R.id.service_lon);
 	    operatorNameField = (TextView) findViewById(R.id.operator_name);
 	    timestampField = (TextView) findViewById(R.id.timestamp);
 	    serverIpField = (TextView) findViewById(R.id.server_ip);
@@ -125,19 +130,46 @@ public class MainActivity extends Activity implements LocationListener{
         //network type
         networkTypeField.setText("Network Type: " + getNetworkType());
         
+        
         //location
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(provider);
-        if (location != null) {
-            System.out.println("Provider " + provider + " has been selected.");
-            onLocationChanged(location);
-        } else {
-            latituteField.setText("Latitute: Location not available");
-            longitudeField.setText("Longtitude: Location not available");
-        }
+        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //Criteria criteria = new Criteria();
+        //provider = locationManager.getBestProvider(criteria, false);
+        //Location location = locationManager.getLastKnownLocation(provider);
+        //if (location != null) {
+        //    System.out.println("Provider " + provider + " has been selected.");
+        //    onLocationChanged(location);
+        //} else {
+        //    latituteField.setText("Latitute: Location not available");
+        //    longitudeField.setText("Longtitude: Location not available");
+        //}
+        
+        locationBrReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String s = intent.getStringExtra(TestService.LOCATION_MESSAGE);
+                System.out.println("Broadcasted message cought form MainActivity");
+                //lat = TestService.latitude;
+                //lng = TestService.longtitude;
+                //Toast.makeText(getApplicationContext(), "Lat:"+ts.getLatitude()+" Lon:"+ts.getLongtitude(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Lat:"+lat+" Lon:"+lng, Toast.LENGTH_SHORT).show();
+                lat = TestService.latitude;
+                lon = TestService.longitude;
+                updateLocationUI(lon, lat);
+                
+                
+                
+            }
+        };
     	
+	}
+	
+	@Override
+	protected void onStart(){
+		super.onStart();
+	    LocalBroadcastManager.getInstance(this).registerReceiver((locationBrReceiver), 
+	        new IntentFilter(TestService.LOCATION_RESULT)
+	    );
 	}
 
 
@@ -165,8 +197,8 @@ public class MainActivity extends Activity implements LocationListener{
 	@Override
 	   protected void onPause(){
 	      super.onPause();
-	      Tel.listen(SignalStrengthListener, PhoneStateListener.LISTEN_NONE);
-	      locationManager.removeUpdates(this);
+	      //Tel.listen(SignalStrengthListener, PhoneStateListener.LISTEN_NONE);
+	      //locationManager.removeUpdates(this);
 	   }
 
 	
@@ -175,9 +207,9 @@ public class MainActivity extends Activity implements LocationListener{
 	@Override
 	protected void onResume(){
 	      super.onResume();
-	      checkGPS();
-	      Tel.listen(SignalStrengthListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-	      locationManager.requestLocationUpdates(provider, 400, 1, this);
+	      checkGPSStatus();
+	      //Tel.listen(SignalStrengthListener,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+	      //locationManager.requestLocationUpdates(provider, 400, 1, this);
 	      
 	    //timestamp
     	  timestamp= getCurrentTimeStamp();
@@ -192,6 +224,13 @@ public class MainActivity extends Activity implements LocationListener{
   		}
 	      
 	   }
+	
+	@Override
+	protected void onStop(){
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(locationBrReceiver);
+	    super.onStop();
+		
+	}
 	
 	
 	private class MyPhoneStateListener extends PhoneStateListener{
@@ -211,13 +250,13 @@ public class MainActivity extends Activity implements LocationListener{
 	};/* End of private Class */
     
     
-    public void onLocationChanged(Location location) {
+    /*public void onLocationChanged(Location location) {
         lat = (float) (location.getLatitude());
         lng = (float) (location.getLongitude());
         latituteField.setText("Latitude: "+String.valueOf(lat));
         longitudeField.setText("Longtitude: "+String.valueOf(lng));
-        //latituteFieldService.setText("Latitude: "+LocationService.getLatitude());
-        //longitudeFieldService.setText("Longtitude: "+LocationService.getLongtitude());
+        latituteFieldService.setText("Latitude: "+ts.getLatitude());
+        longitudeFieldService.setText("Longtitude: "+ts.getLongtitude());
         
       
     }
@@ -237,7 +276,7 @@ public class MainActivity extends Activity implements LocationListener{
     @Override
     public void onProviderDisabled(String provider) {
     	Toast.makeText(this, "Disabled provider " + provider,Toast.LENGTH_SHORT).show();
-    }
+    }*/
     
     public static String getCurrentTimeStamp(){
         try {
@@ -336,13 +375,11 @@ public class MainActivity extends Activity implements LocationListener{
     	
     	
     	WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK,this,response);
-    	Location location = locationManager.getLastKnownLocation(provider);
+    	//Location location = locationManager.getLastKnownLocation(provider);
     	String timeStamp = getCurrentTimeStamp();
     	String user = activeUser;
     	String operator = operatorName;
     	int cinr = signalStrength;
-    	float lat = (float) location.getLatitude();
-    	float lon = (float) location.getLongitude();
     	wst.addNameValuePair("timestamp", timeStamp);
     	wst.addNameValuePair("user", user);
     	wst.addNameValuePair("operator", operator);
@@ -358,8 +395,9 @@ public class MainActivity extends Activity implements LocationListener{
      * Starts the StoreLocationService
      * @param v
      */
+    
     public void startService (View v){
-    	notificationBuild();
+    	//notificationBuild();
     	Intent intent = new Intent(this, TestService.class);
     	startService(intent);
     }
@@ -369,7 +407,7 @@ public class MainActivity extends Activity implements LocationListener{
      * @param v
      */
     public void stopService (View v){
-    	notificationDestroy();
+    	//notificationDestroy();
     	Intent intent = new Intent(this, TestService.class);
     	stopService(intent);
     }
@@ -377,7 +415,7 @@ public class MainActivity extends Activity implements LocationListener{
     /**
      * Checks whether GPS provides is enabled and if is not prompts an AlertDialog
      */
-    private void checkGPS (){
+    private void checkGPSStatus(){
     	LocationManager lmService = (LocationManager) getSystemService(LOCATION_SERVICE);
     	boolean enabled = lmService.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		if (!enabled) {
@@ -405,7 +443,7 @@ public class MainActivity extends Activity implements LocationListener{
     /**
      * Builds notification for the SroreLocationService
      */
-    
+    /*
     private void notificationBuild (){
     	NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
     	mBuilder.setSmallIcon(R.drawable.ic_launcher);
@@ -438,15 +476,16 @@ public class MainActivity extends Activity implements LocationListener{
     	
     	
     	
-    }
+    }*/
     
     /**
      * Destroys notification for the StoreLocationService
      */
+    /**
     private void notificationDestroy (){
     	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     	mNotificationManager.cancel(0);
-    }
+    }*/
     
     /**
      * Stores pilot Data for test
@@ -461,7 +500,7 @@ public class MainActivity extends Activity implements LocationListener{
     	values.put(DataEntry.CINR, signalStrength );
     	values.put(DataEntry.NETWORK_TYPE, getNetworkType());
     	values.put(DataEntry.LATITUDE, String.valueOf(lat));
-    	values.put(DataEntry.LATITUDE, String.valueOf(lng));
+    	values.put(DataEntry.LATITUDE, String.valueOf(lon));
     	long newRowId;
     	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
     	Toast.makeText(getApplicationContext(), "Data Stored in local db", Toast.LENGTH_SHORT).show();
@@ -502,4 +541,11 @@ public class MainActivity extends Activity implements LocationListener{
     	itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
     	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
     }
+    
+    private void updateLocationUI(float lon , float lat){
+    	latituteField.setText("Latitute: "+lat);
+    	longitudeField.setText("Longitude: "+lon);
+    	
+    }
+    
 }
