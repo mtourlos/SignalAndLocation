@@ -4,9 +4,11 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 
-import org.talos.activities.DataContract.DataEntry;
+import org.talos.db.DataDbHelper;
+import org.talos.db.DataContract.DataEntry;
 import org.talos.services.IntentTestService;
 import org.talos.services.TestService;
+import org.talos.services.WebServiceTask;
 
 import com.example.signalandlocation.R;
 
@@ -52,9 +54,9 @@ public class MainActivity extends Activity{
 	public static final String KEY_PREF_ACTIVE_USER = "settings_active_user";
 	public static final String KEY_PREF_SERVER_IP="settings_server_ip";
 	
-	//signal listeners
-	TelephonyManager        Tel;
-	MyPhoneStateListener    SignalStrengthListener;
+//	//signal listeners
+//	TelephonyManager        Tel;
+//	MyPhoneStateListener    SignalStrengthListener;
 	
 	//location listener
 	//LocationManager			locationManager;
@@ -117,18 +119,19 @@ public class MainActivity extends Activity{
 	    serverIpField = (TextView) findViewById(R.id.server_ip);
 	    activeUserField = (TextView) findViewById(R.id.active_user);
 	    networkTypeField = (TextView) findViewById(R.id.network_type);
+	    signalStrengthField = (TextView) findViewById(R.id.signal_out);
 	    
 		//signal strength 
-		SignalStrengthListener = new MyPhoneStateListener();
-		Tel = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        Tel.listen(SignalStrengthListener ,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+//		SignalStrengthListener = new MyPhoneStateListener();
+//		Tel = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+//        Tel.listen(SignalStrengthListener ,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
         
         //operator name
-        operatorName = Tel.getNetworkOperatorName();
-        operatorNameField.setText("Operator Name: " + operatorName);
+//        operatorName = Tel.getNetworkOperatorName();
+//        operatorNameField.setText("Operator Name: " + operatorName);
         
         //network type
-        networkTypeField.setText("Network Type: " + getNetworkType());
+//        networkTypeField.setText("Network Type: " + getNetworkType());
         
         
         //location
@@ -145,7 +148,8 @@ public class MainActivity extends Activity{
         //}
         
         locationBrReceiver = new BroadcastReceiver() {
-            @Override
+            
+        	@Override
             public void onReceive(Context context, Intent intent) {
                 String s = intent.getStringExtra(TestService.LOCATION_MESSAGE);
                 System.out.println("Broadcasted message cought form MainActivity");
@@ -155,7 +159,13 @@ public class MainActivity extends Activity{
                 //Toast.makeText(getApplicationContext(), "Lat:"+lat+" Lon:"+lng, Toast.LENGTH_SHORT).show();
                 lat = TestService.latitude;
                 lon = TestService.longitude;
+                signalStrength = TestService.signalStrength;
+                networkType = TestService.networkType;
+                operatorName = TestService.operatorName;
                 updateLocationUI(lon, lat);
+                updateOperatorDetailsUI(signalStrength,networkType,operatorName);
+                System.out.println(signalStrength+networkType+operatorName);
+                
                 
                 
                 
@@ -233,21 +243,21 @@ public class MainActivity extends Activity{
 	}
 	
 	
-	private class MyPhoneStateListener extends PhoneStateListener{
-		/* Get the Signal strength from the provider, each time there is an update */
-		@Override
-		public void onSignalStrengthsChanged(SignalStrength signalStrengths) 
-		{
-			super.onSignalStrengthsChanged(signalStrengths);
-			//Toast.makeText(getApplicationContext(), "Go to Firstdroid!!! GSM Cinr = " + String.valueOf(signalStrength.getGsmSignalStrength()), Toast.LENGTH_SHORT).show();
-			signalStrength = signalStrengths.getGsmSignalStrength();  
-			signalStrengthField = (TextView) findViewById(R.id.signal_out);
-			signalStrengthField.setText("GSM CINR= " + signalStrength );
-		}
-		
-		
-		
-	};/* End of private Class */
+//	private class MyPhoneStateListener extends PhoneStateListener{
+//		/* Get the Signal strength from the provider, each time there is an update */
+//		@Override
+//		public void onSignalStrengthsChanged(SignalStrength signalStrengths) 
+//		{
+//			super.onSignalStrengthsChanged(signalStrengths);
+//			//Toast.makeText(getApplicationContext(), "Go to Firstdroid!!! GSM Cinr = " + String.valueOf(signalStrength.getGsmSignalStrength()), Toast.LENGTH_SHORT).show();
+//			signalStrength = signalStrengths.getGsmSignalStrength();  
+//			signalStrengthField = (TextView) findViewById(R.id.signal_out);
+//			signalStrengthField.setText("GSM CINR= " + signalStrength );
+//		}
+//		
+//		
+//		
+//	};/* End of private Class */
     
     
     /*public void onLocationChanged(Location location) {
@@ -296,63 +306,63 @@ public class MainActivity extends Activity{
      * Translates network id to string for ui
      * @return network type to string
      */
-    public String getNetworkType(){
-    	int networkType;
-    	String result=null;
-    	networkType = Tel.getNetworkType();
-    	switch (networkType){
-    	case 7:
-    	    result = "1xRTT";
-    	    break;      
-    	case 4:
-    	    result = "CDMA";
-    	    break;      
-    	case 2:
-    	    result = "EDGE";
-    	    break;  
-    	case 14:
-    		result = "eHRPD";
-    	    break;      
-    	case 5:
-    		result = "EVDO rev. 0";
-    	    break;  
-    	case 6:
-    		result = "EVDO rev. A";
-    	    break;  
-    	case 12:
-    		result = "EVDO rev. B";
-    	    break;  
-    	case 1:
-    		result = "GPRS";
-    	    break;      
-    	case 8:
-    		result = "HSDPA";
-    	    break;      
-    	case 10:
-    		result = "HSPA";
-    	    break;          
-    	case 15:
-    		result = "HSPA+";
-    	    break;          
-    	case 9:
-    		result = "HSUPA";
-    	    break;          
-    	case 11:
-    		result = "iDen";
-    	    break;
-    	case 13:
-    		result = "LTE";
-    	    break;
-    	case 3:
-    		result = "UMTS";
-    	    break;          
-    	case 0:
-    		result = "Unknown";
-    	    break;
-    	}
-    	
-    	return result;
-    }
+//    public String getNetworkType(){
+//    	int networkType;
+//    	String result=null;
+//    	networkType = Tel.getNetworkType();
+//    	switch (networkType){
+//    	case 7:
+//    	    result = "1xRTT";
+//    	    break;      
+//    	case 4:
+//    	    result = "CDMA";
+//    	    break;      
+//    	case 2:
+//    	    result = "EDGE";
+//    	    break;  
+//    	case 14:
+//    		result = "eHRPD";
+//    	    break;      
+//    	case 5:
+//    		result = "EVDO rev. 0";
+//    	    break;  
+//    	case 6:
+//    		result = "EVDO rev. A";
+//    	    break;  
+//    	case 12:
+//    		result = "EVDO rev. B";
+//    	    break;  
+//    	case 1:
+//    		result = "GPRS";
+//    	    break;      
+//    	case 8:
+//    		result = "HSDPA";
+//    	    break;      
+//    	case 10:
+//    		result = "HSPA";
+//    	    break;          
+//    	case 15:
+//    		result = "HSPA+";
+//    	    break;          
+//    	case 9:
+//    		result = "HSUPA";
+//    	    break;          
+//    	case 11:
+//    		result = "iDen";
+//    	    break;
+//    	case 13:
+//    		result = "LTE";
+//    	    break;
+//    	case 3:
+//    		result = "UMTS";
+//    	    break;          
+//    	case 0:
+//    		result = "Unknown";
+//    	    break;
+//    	}
+//    	
+//    	return result;
+//    }
     
     /**
      * Loads users settings from settings.xml
@@ -498,7 +508,7 @@ public class MainActivity extends Activity{
     	values.put(DataEntry.USER, activeUser);
     	values.put(DataEntry.OPERATOR, operatorName);
     	values.put(DataEntry.CINR, signalStrength );
-    	values.put(DataEntry.NETWORK_TYPE, getNetworkType());
+    	values.put(DataEntry.NETWORK_TYPE, networkType);
     	values.put(DataEntry.LATITUDE, String.valueOf(lat));
     	values.put(DataEntry.LATITUDE, String.valueOf(lon));
     	long newRowId;
@@ -546,6 +556,12 @@ public class MainActivity extends Activity{
     	latituteField.setText("Latitute: "+lat);
     	longitudeField.setText("Longitude: "+lon);
     	
+    }
+    
+    private void updateOperatorDetailsUI(int signalStrength, String networkType, String operatorName){
+    	signalStrengthField.setText("Signal strength: " + signalStrength);
+    	networkTypeField.setText("Network type: " + networkType);
+    	operatorNameField.setText("Operator name: " + operatorName);
     }
     
 }

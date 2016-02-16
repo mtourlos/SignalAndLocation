@@ -1,4 +1,4 @@
-package org.talos.activities;
+package org.talos.db;
 
 import android.provider.BaseColumns;
 	

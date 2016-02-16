@@ -1,6 +1,6 @@
-package org.talos.activities;
+package org.talos.db;
 
-import org.talos.activities.DataContract.DataEntry;
+import org.talos.db.DataContract.DataEntry;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
