@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 
+import org.talos.beans.DataBean;
 import org.talos.db.DataDbHelper;
+import org.talos.db.DataDbOperations;
 import org.talos.db.DataContract.DataEntry;
 import org.talos.services.IntentTestService;
 import org.talos.services.TestService;
@@ -53,14 +55,6 @@ public class MainActivity extends Activity{
 	
 	public static final String KEY_PREF_ACTIVE_USER = "settings_active_user";
 	public static final String KEY_PREF_SERVER_IP="settings_server_ip";
-	
-//	//signal listeners
-//	TelephonyManager        Tel;
-//	MyPhoneStateListener    SignalStrengthListener;
-	
-	//location listener
-	//LocationManager			locationManager;
-	//private String 			provider;
 	
 	//network type
 	private String networkType;
@@ -120,32 +114,6 @@ public class MainActivity extends Activity{
 	    activeUserField = (TextView) findViewById(R.id.active_user);
 	    networkTypeField = (TextView) findViewById(R.id.network_type);
 	    signalStrengthField = (TextView) findViewById(R.id.signal_out);
-	    
-		//signal strength 
-//		SignalStrengthListener = new MyPhoneStateListener();
-//		Tel = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-//        Tel.listen(SignalStrengthListener ,PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-        
-        //operator name
-//        operatorName = Tel.getNetworkOperatorName();
-//        operatorNameField.setText("Operator Name: " + operatorName);
-        
-        //network type
-//        networkTypeField.setText("Network Type: " + getNetworkType());
-        
-        
-        //location
-        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        //Criteria criteria = new Criteria();
-        //provider = locationManager.getBestProvider(criteria, false);
-        //Location location = locationManager.getLastKnownLocation(provider);
-        //if (location != null) {
-        //    System.out.println("Provider " + provider + " has been selected.");
-        //    onLocationChanged(location);
-        //} else {
-        //    latituteField.setText("Latitute: Location not available");
-        //    longitudeField.setText("Longtitude: Location not available");
-        //}
         
         locationBrReceiver = new BroadcastReceiver() {
             
@@ -241,52 +209,6 @@ public class MainActivity extends Activity{
 	    super.onStop();
 		
 	}
-	
-	
-//	private class MyPhoneStateListener extends PhoneStateListener{
-//		/* Get the Signal strength from the provider, each time there is an update */
-//		@Override
-//		public void onSignalStrengthsChanged(SignalStrength signalStrengths) 
-//		{
-//			super.onSignalStrengthsChanged(signalStrengths);
-//			//Toast.makeText(getApplicationContext(), "Go to Firstdroid!!! GSM Cinr = " + String.valueOf(signalStrength.getGsmSignalStrength()), Toast.LENGTH_SHORT).show();
-//			signalStrength = signalStrengths.getGsmSignalStrength();  
-//			signalStrengthField = (TextView) findViewById(R.id.signal_out);
-//			signalStrengthField.setText("GSM CINR= " + signalStrength );
-//		}
-//		
-//		
-//		
-//	};/* End of private Class */
-    
-    
-    /*public void onLocationChanged(Location location) {
-        lat = (float) (location.getLatitude());
-        lng = (float) (location.getLongitude());
-        latituteField.setText("Latitude: "+String.valueOf(lat));
-        longitudeField.setText("Longtitude: "+String.valueOf(lng));
-        latituteFieldService.setText("Latitude: "+ts.getLatitude());
-        longitudeFieldService.setText("Longtitude: "+ts.getLongtitude());
-        
-      
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    	// TODO Auto-generated method stub
-    	
-    }
-    
-    @Override
-    public void onProviderEnabled(String provider) {
-    	Toast.makeText(this, "Enabled new provider " + provider,Toast.LENGTH_SHORT).show();
-    	
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-    	Toast.makeText(this, "Disabled provider " + provider,Toast.LENGTH_SHORT).show();
-    }*/
     
     public static String getCurrentTimeStamp(){
         try {
@@ -301,68 +223,6 @@ public class MainActivity extends Activity{
             return null;
         }
     }
-    
-    /**
-     * Translates network id to string for ui
-     * @return network type to string
-     */
-//    public String getNetworkType(){
-//    	int networkType;
-//    	String result=null;
-//    	networkType = Tel.getNetworkType();
-//    	switch (networkType){
-//    	case 7:
-//    	    result = "1xRTT";
-//    	    break;      
-//    	case 4:
-//    	    result = "CDMA";
-//    	    break;      
-//    	case 2:
-//    	    result = "EDGE";
-//    	    break;  
-//    	case 14:
-//    		result = "eHRPD";
-//    	    break;      
-//    	case 5:
-//    		result = "EVDO rev. 0";
-//    	    break;  
-//    	case 6:
-//    		result = "EVDO rev. A";
-//    	    break;  
-//    	case 12:
-//    		result = "EVDO rev. B";
-//    	    break;  
-//    	case 1:
-//    		result = "GPRS";
-//    	    break;      
-//    	case 8:
-//    		result = "HSDPA";
-//    	    break;      
-//    	case 10:
-//    		result = "HSPA";
-//    	    break;          
-//    	case 15:
-//    		result = "HSPA+";
-//    	    break;          
-//    	case 9:
-//    		result = "HSUPA";
-//    	    break;          
-//    	case 11:
-//    		result = "iDen";
-//    	    break;
-//    	case 13:
-//    		result = "LTE";
-//    	    break;
-//    	case 3:
-//    		result = "UMTS";
-//    	    break;          
-//    	case 0:
-//    		result = "Unknown";
-//    	    break;
-//    	}
-//    	
-//    	return result;
-//    }
     
     /**
      * Loads users settings from settings.xml
@@ -451,53 +311,6 @@ public class MainActivity extends Activity{
     }
     
     /**
-     * Builds notification for the SroreLocationService
-     */
-    /*
-    private void notificationBuild (){
-    	NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-    	mBuilder.setSmallIcon(R.drawable.ic_launcher);
-    	mBuilder.setContentTitle("Talos");
-    	mBuilder.setContentText("Talos service is now up and running!");
-    	mBuilder.setOngoing(true);
-    	
-    	Intent resultIntent = new Intent(this, MainActivity.class);
-    	TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-    	stackBuilder.addParentStack(MainActivity.class);
-
-    	// Adds the Intent that starts the Activity to the top of the stack
-    	stackBuilder.addNextIntent(resultIntent);
-    	PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-    	mBuilder.setContentIntent(resultPendingIntent);
-    	
-    	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
-    	int notificationID=0;
-		// notificationID allows you to update the notification later on.
-    	mNotificationManager.notify(notificationID, mBuilder.build());
-    	
-    	try {
-    	    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    	    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-    	    r.play();
-    	} catch (Exception e) {
-    	    e.printStackTrace();
-    	}
-    	
-    	
-    	
-    }*/
-    
-    /**
-     * Destroys notification for the StoreLocationService
-     */
-    /**
-    private void notificationDestroy (){
-    	NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    	mNotificationManager.cancel(0);
-    }*/
-    
-    /**
      * Stores pilot Data for test
      * @param v
      */
@@ -513,7 +326,7 @@ public class MainActivity extends Activity{
     	values.put(DataEntry.LATITUDE, String.valueOf(lon));
     	long newRowId;
     	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
-    	Toast.makeText(getApplicationContext(), "Data Stored in local db", Toast.LENGTH_SHORT).show();
+    	Toast.makeText(getApplicationContext(), "Data Stored in local db "+getCurrentTimeStamp(), Toast.LENGTH_SHORT).show();
     }
    
     /**
@@ -551,6 +364,17 @@ public class MainActivity extends Activity{
     	itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
     	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
     }
+    
+//    public void loadLocalDb(View v){
+//    	DataDbOperations dbOp = new DataDbOperations(v.getContext());
+//    	DataBean data = new DataBean();
+//    	dbOp.initRead();
+//    	dbOp.moveCursorToFirst();
+//    	data = dbOp.getData();
+//    	System.out.println(data.getTimeStamp());
+//    	dbOp.moveCursorToLast();
+//    	System.out.println(data.getTimeStamp());
+//    }
     
     private void updateLocationUI(float lon , float lat){
     	latituteField.setText("Latitute: "+lat);
