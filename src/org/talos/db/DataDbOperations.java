@@ -51,6 +51,7 @@ public class DataDbOperations {
     	result.setLatitude(cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR)));
     	result.setLongitude(cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR)));
     	
+    	System.out.println(cursor.getCount());
     	return result;
     }
 	
@@ -60,6 +61,10 @@ public class DataDbOperations {
 	
 	public boolean moveCursorNext(){
 		return cursor.moveToNext();
+	}
+	
+	public boolean isCursorLast(){
+		return cursor.isLast();
 	}
 	
 	public boolean moveCursorToLast(){

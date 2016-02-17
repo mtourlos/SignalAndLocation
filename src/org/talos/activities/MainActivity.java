@@ -4,6 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.talos.beans.DataBean;
 import org.talos.db.DataDbHelper;
 import org.talos.db.DataDbOperations;
@@ -328,42 +331,6 @@ public class MainActivity extends Activity{
     	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
     	Toast.makeText(getApplicationContext(), "Data Stored in local db "+getCurrentTimeStamp(), Toast.LENGTH_SHORT).show();
     }
-   
-    /**
-     * Displays some data from local db
-     * @param v
-     */
-    public void loadLocalDb(View v){
-    	SQLiteDatabase db = mDbHelper.getReadableDatabase();
-    	String[] projection = {
-    		    DataEntry.TIME_STAMP,
-    		    DataEntry.USER,
-    		    DataEntry.CINR
-    		    };
-    	String sortOrder =
-    		    DataEntry.TIME_STAMP + " DESC";
-    	
-    	Cursor cursor = db.query(
-    		    DataEntry.TABLE_NAME,  // The table to query
-    		    projection,                               // The columns to return
-    		    null,                                // The columns for the WHERE clause
-    		    null,                            // The values for the WHERE clause
-    		    null,                                     // don't group the rows
-    		    null,                                     // don't filter by row groups
-    		    sortOrder                                 // The sort order
-    		    );
-    	
-    	cursor.moveToFirst();
-    	String itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
-    	String itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
-    	String itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
-    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
-    	cursor.moveToLast();
-    	itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
-    	itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
-    	itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
-    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
-    }
     
 //    public void loadLocalDb(View v){
 //    	DataDbOperations dbOp = new DataDbOperations(v.getContext());
@@ -373,8 +340,38 @@ public class MainActivity extends Activity{
 //    	data = dbOp.getData();
 //    	System.out.println(data.getTimeStamp());
 //    	dbOp.moveCursorToLast();
+//    	data = dbOp.getData();
 //    	System.out.println(data.getTimeStamp());
 //    }
+    
+    public void loadLocalDb(View v) throws JSONException{
+    	JSONArray jArray = new JSONArray();
+//    	JSONObject jObject = new JSONObject();
+    	DataDbOperations dbOp = new DataDbOperations(v.getContext());
+    	DataBean data = new DataBean();
+    	dbOp.initRead();
+    	dbOp.moveCursorToFirst();
+    	data = dbOp.getData();
+    	jArray.put(createJsonObject(data));
+    	dbOp.moveCursorNext();
+    	data = dbOp.getData();
+    	jArray.put(createJsonObject(data));
+    	System.out.println(jArray);
+    	
+    }
+    
+    JSONObject createJsonObject(DataBean data) throws JSONException{
+    	JSONObject result = new JSONObject();
+    	
+    	result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
+    	result.put(DataEntry.USER, data.getUser());
+    	result.put(DataEntry.OPERATOR, data.getOperator());
+    	result.put(DataEntry.CINR, data.getCinr());
+    	result.put(DataEntry.LATITUDE, data.getLatitude());
+    	result.put(DataEntry.LONGTITUDE, data.getLongitude());
+//    	System.out.println(result);
+    	return result;
+    }
     
     private void updateLocationUI(float lon , float lat){
     	latituteField.setText("Latitute: "+lat);
