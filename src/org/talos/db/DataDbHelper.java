@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataDbHelper extends SQLiteOpenHelper  {
 	
-	 public static final int DATABASE_VERSION = 1;   
+	 public static final int DATABASE_VERSION = 3;   
 	 public static final String DATABASE_NAME = "Data.db";
 	 private static final String TEXT_TYPE = " TEXT";
 	 private static final String COMMA_SEP = ",";
@@ -20,7 +20,7 @@ public class DataDbHelper extends SQLiteOpenHelper  {
 			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.NETWORK_TYPE + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.LATITUDE + TEXT_TYPE + COMMA_SEP +	
-			 DataEntry.LONGTITUDE + TEXT_TYPE + " )";
+			 DataEntry.LONGITUDE + TEXT_TYPE + " )";
 	 private static final String SQL_DELETE_ENTRIES =   
 			 "DROP TABLE IF EXISTS " + DataEntry.TABLE_NAME;
 	 

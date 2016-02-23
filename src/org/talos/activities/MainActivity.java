@@ -1,6 +1,7 @@
 package org.talos.activities;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 
@@ -326,37 +327,28 @@ public class MainActivity extends Activity{
     	values.put(DataEntry.CINR, signalStrength );
     	values.put(DataEntry.NETWORK_TYPE, networkType);
     	values.put(DataEntry.LATITUDE, String.valueOf(lat));
-    	values.put(DataEntry.LATITUDE, String.valueOf(lon));
+    	values.put(DataEntry.LONGITUDE, String.valueOf(lon));
     	long newRowId;
     	newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
     	Toast.makeText(getApplicationContext(), "Data Stored in local db "+getCurrentTimeStamp(), Toast.LENGTH_SHORT).show();
     }
     
-//    public void loadLocalDb(View v){
-//    	DataDbOperations dbOp = new DataDbOperations(v.getContext());
-//    	DataBean data = new DataBean();
-//    	dbOp.initRead();
-//    	dbOp.moveCursorToFirst();
-//    	data = dbOp.getData();
-//    	System.out.println(data.getTimeStamp());
-//    	dbOp.moveCursorToLast();
-//    	data = dbOp.getData();
-//    	System.out.println(data.getTimeStamp());
-//    }
-    
     public void loadLocalDb(View v) throws JSONException{
     	JSONArray jArray = new JSONArray();
-//    	JSONObject jObject = new JSONObject();
+    	JSONObject jObject = new JSONObject();
     	DataDbOperations dbOp = new DataDbOperations(v.getContext());
     	DataBean data = new DataBean();
     	dbOp.initRead();
     	dbOp.moveCursorToFirst();
     	data = dbOp.getData();
     	jArray.put(createJsonObject(data));
-    	dbOp.moveCursorNext();
-    	data = dbOp.getData();
-    	jArray.put(createJsonObject(data));
-    	System.out.println(jArray);
+    	while (!dbOp.isCursorLast()){
+    		dbOp.moveCursorNext();
+    		data = dbOp.getData();
+    		jArray.put(createJsonObject(data));
+    	}
+    	jObject.put("data",jArray );
+    	System.out.println(jObject);
     	
     }
     
@@ -368,8 +360,8 @@ public class MainActivity extends Activity{
     	result.put(DataEntry.OPERATOR, data.getOperator());
     	result.put(DataEntry.CINR, data.getCinr());
     	result.put(DataEntry.LATITUDE, data.getLatitude());
-    	result.put(DataEntry.LONGTITUDE, data.getLongitude());
-//    	System.out.println(result);
+    	result.put(DataEntry.LONGITUDE, data.getLongitude());
+    	System.out.println(result);
     	return result;
     }
     

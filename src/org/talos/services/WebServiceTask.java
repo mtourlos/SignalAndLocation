@@ -20,15 +20,20 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.talos.beans.DataBean;
 import org.talos.db.DataDbHelper;
+import org.talos.db.DataDbOperations;
 import org.talos.db.DataContract.DataEntry;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 public class WebServiceTask extends AsyncTask<String, Void, String> {
@@ -133,7 +138,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 						+ params.get(4).getValue() + "\", \""
 						+ params.get(5).getName() + "\":\""
 						+ params.get(5).getValue() + "\" } ] }";
-				StringEntity se = new StringEntity(entity);
+				StringEntity se = new StringEntity(getEntity().toString());
 				System.out.println(entity);
 				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
 						"application/json"));
@@ -181,48 +186,36 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 		return total.toString();
 	}
 
-	JSONArray buildJsonFromDb() {
-		JSONArray result = new JSONArray();
-		JSONObject temp = new JSONObject();
-				
-		
-		return result;
-
-	}
-	
-	JSONObject nextJSONObject(){
-		JSONObject result = new JSONObject();
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-    	String[] projection = {
-    		    DataEntry.TIME_STAMP,
-    		    DataEntry.USER,
-    		    DataEntry.CINR
-    		    };
-    	String sortOrder =
-    		    DataEntry.TIME_STAMP + " DESC";
+	public JSONObject getEntity() throws JSONException{
+    	JSONArray jArray = new JSONArray();
+    	JSONObject result = new JSONObject();
+    	DataDbOperations dbOp = new DataDbOperations(mContext);
+    	DataBean data = new DataBean();
+    	dbOp.initRead();
+    	dbOp.moveCursorToFirst();
+    	data = dbOp.getData();
+    	jArray.put(createJsonObject(data));
+    	while (!dbOp.isCursorLast()){
+    		dbOp.moveCursorNext();
+    		data = dbOp.getData();
+    		jArray.put(createJsonObject(data));
+    	}
+    	result.put("data",jArray );
+    	System.out.println(result);
+    	return result;
+    }
+    
+    JSONObject createJsonObject(DataBean data) throws JSONException{
+    	JSONObject result = new JSONObject();
     	
-    	Cursor cursor = db.query(
-    		    DataEntry.TABLE_NAME,  // The table to query
-    		    projection,                               // The columns to return
-    		    null,                                // The columns for the WHERE clause
-    		    null,                            // The values for the WHERE clause
-    		    null,                                     // don't group the rows
-    		    null,                                     // don't filter by row groups
-    		    sortOrder                                 // The sort order
-    		    );
-    	
-    	cursor.moveToFirst();
-    	String itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
-    	String itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
-    	String itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
-//    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
-    	cursor.moveToLast();
-    	itemTimeStamp = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.TIME_STAMP));
-    	itemUser = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.USER));
-    	itemCINR = cursor.getString(cursor.getColumnIndexOrThrow(DataEntry.CINR));
-//    	Toast.makeText(getApplicationContext(), itemTimeStamp, Toast.LENGTH_SHORT).show();
-		return result;
-		
-	}
+    	result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
+    	result.put(DataEntry.USER, data.getUser());
+    	result.put(DataEntry.OPERATOR, data.getOperator());
+    	result.put(DataEntry.CINR, data.getCinr());
+    	result.put(DataEntry.LATITUDE, data.getLatitude());
+    	result.put(DataEntry.LONGITUDE, data.getLongitude());
+//    	System.out.println(result);
+    	return result;
+    }
 
 }
