@@ -2,24 +2,34 @@ package org.talos.db;
 
 import org.talos.beans.DataBean;
 import org.talos.db.DataContract.DataEntry;
+import org.talos.services.TalosService;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
 
 public class DataDbOperations {
 	DataDbHelper mDbHelper;
 	Cursor cursor;
+	SQLiteDatabase db;
+	Context context;
 
 	public DataDbOperations(final Context context) {
+		this.context = context;
 		mDbHelper = new DataDbHelper(context.getApplicationContext());
 	}
 
+	public void initWrite() {
+		db = mDbHelper.getWritableDatabase();
+	}
+
 	public void initRead() {
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		db = mDbHelper.getReadableDatabase();
 		String[] projection = { DataEntry.TIME_STAMP, DataEntry.USER,
-				DataEntry.OPERATOR, DataEntry.NETWORK_TYPE, DataEntry.CINR, DataEntry.LATITUDE,
-				DataEntry.LONGITUDE };
+				DataEntry.OPERATOR, DataEntry.NETWORK_TYPE, DataEntry.CINR,
+				DataEntry.LATITUDE, DataEntry.LONGITUDE };
 		String sortOrder = DataEntry.TIME_STAMP + " DESC";
 
 		cursor = db.query(DataEntry.TABLE_NAME, // The table to query
@@ -49,8 +59,23 @@ public class DataDbOperations {
 		result.setLongitude(cursor.getString(cursor
 				.getColumnIndexOrThrow(DataEntry.LONGITUDE)));
 
-		System.out.println(cursor.getCount());
+		// System.out.println(cursor.getCount());
 		return result;
+	}
+
+	public void storeData() {
+		ContentValues values = new ContentValues();
+		values.put(DataEntry.TIME_STAMP, TalosService.getCurrentTimeStamp());
+		values.put(DataEntry.USER, TalosService.activeUser);
+		values.put(DataEntry.OPERATOR, TalosService.operatorName);
+		values.put(DataEntry.CINR, TalosService.signalStrength);
+		values.put(DataEntry.NETWORK_TYPE, TalosService.networkType);
+		values.put(DataEntry.LATITUDE, TalosService.latitude);
+		values.put(DataEntry.LONGITUDE, TalosService.longitude);
+		db.insert(DataEntry.TABLE_NAME, null, values);
+		Toast.makeText(context,
+				"Data Stored in local db " + TalosService.getCurrentTimeStamp(),
+				Toast.LENGTH_SHORT).show();
 	}
 
 	public boolean moveCursorToFirst() {
@@ -67,6 +92,11 @@ public class DataDbOperations {
 
 	public boolean moveCursorToLast() {
 		return cursor.moveToLast();
+	}
+
+	public boolean dataExists() {
+		initRead();
+		return cursor.getCount() != 0 ? true : false;
 	}
 
 	public void clearData() {

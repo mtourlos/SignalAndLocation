@@ -1,28 +1,20 @@
 package org.talos.activities;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Currency;
 import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.talos.beans.DataBean;
+import org.talos.db.DataContract.DataEntry;
 import org.talos.db.DataDbHelper;
 import org.talos.db.DataDbOperations;
-import org.talos.db.DataContract.DataEntry;
-import org.talos.services.IntentTestService;
-import org.talos.services.TestService;
+import org.talos.services.TalosService;
 import org.talos.services.WebServiceTask;
-
-import com.example.signalandlocation.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -30,30 +22,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.PhoneStateListener;
-import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.signalandlocation.R;
 
 public class MainActivity extends Activity {
 
@@ -92,7 +73,7 @@ public class MainActivity extends Activity {
 	DataDbHelper mDbHelper;
 
 	// test
-	TestService ts = new TestService();
+	TalosService ts = new TalosService();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -119,12 +100,12 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				String s = intent.getStringExtra(TestService.LOCATION_MESSAGE);
-				lat = TestService.latitude;
-				lon = TestService.longitude;
-				signalStrength = TestService.signalStrength;
-				networkType = TestService.networkType;
-				operatorName = TestService.operatorName;
+				String s = intent.getStringExtra(TalosService.LOCATION_MESSAGE);
+				lat = TalosService.latitude;
+				lon = TalosService.longitude;
+				signalStrength = TalosService.signalStrength;
+				networkType = TalosService.networkType;
+				operatorName = TalosService.operatorName;
 				updateLocationUI(lon, lat);
 				updateOperatorDetailsUI(signalStrength, networkType,
 						operatorName);
@@ -139,7 +120,7 @@ public class MainActivity extends Activity {
 		super.onStart();
 		LocalBroadcastManager.getInstance(this).registerReceiver(
 				(locationBrReceiver),
-				new IntentFilter(TestService.LOCATION_RESULT));
+				new IntentFilter(TalosService.LOCATION_RESULT));
 	}
 
 	@Override
@@ -235,20 +216,9 @@ public class MainActivity extends Activity {
 
 		WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK, this,
 				response);
-		String timeStamp = getCurrentTimeStamp();
-		String user = activeUser;
-		String operator = operatorName;
-		int cinr = signalStrength;
-		wst.addNameValuePair("timestamp", timeStamp);
-		wst.addNameValuePair("user", user);
-		wst.addNameValuePair("operator", operator);
-		wst.addNameValuePair("cinr", Integer.toString(cinr));
-		wst.addNameValuePair("latitude", Float.toString(lat));
-		wst.addNameValuePair("longtitude", Float.toString(lon));
 
 		wst.execute("http://" + serverIp
 				+ ":8080/TalosServer/service/userservice/datas");
-
 	}
 
 	/**
@@ -258,7 +228,7 @@ public class MainActivity extends Activity {
 	 */
 
 	public void startService(View v) {
-		Intent intent = new Intent(this, TestService.class);
+		Intent intent = new Intent(this, TalosService.class);
 		startService(intent);
 	}
 
@@ -268,7 +238,7 @@ public class MainActivity extends Activity {
 	 * @param v
 	 */
 	public void stopService(View v) {
-		Intent intent = new Intent(this, TestService.class);
+		Intent intent = new Intent(this, TalosService.class);
 		stopService(intent);
 	}
 
@@ -310,21 +280,27 @@ public class MainActivity extends Activity {
 	 * 
 	 * @param v
 	 */
+//	public void storePilotData(View v) {
+//		SQLiteDatabase db = mDbHelper.getWritableDatabase();
+//		ContentValues values = new ContentValues();
+//		values.put(DataEntry.TIME_STAMP, getCurrentTimeStamp());
+//		values.put(DataEntry.USER, activeUser);
+//		values.put(DataEntry.OPERATOR, operatorName);
+//		values.put(DataEntry.CINR, signalStrength);
+//		values.put(DataEntry.NETWORK_TYPE, networkType);
+//		values.put(DataEntry.LATITUDE, String.valueOf(lat));
+//		values.put(DataEntry.LONGITUDE, String.valueOf(lon));
+//		long newRowId;
+//		newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
+//		Toast.makeText(getApplicationContext(),
+//				"Data Stored in local db " + getCurrentTimeStamp(),
+//				Toast.LENGTH_SHORT).show();
+//	}
+	
 	public void storePilotData(View v) {
-		SQLiteDatabase db = mDbHelper.getWritableDatabase();
-		ContentValues values = new ContentValues();
-		values.put(DataEntry.TIME_STAMP, getCurrentTimeStamp());
-		values.put(DataEntry.USER, activeUser);
-		values.put(DataEntry.OPERATOR, operatorName);
-		values.put(DataEntry.CINR, signalStrength);
-		values.put(DataEntry.NETWORK_TYPE, networkType);
-		values.put(DataEntry.LATITUDE, String.valueOf(lat));
-		values.put(DataEntry.LONGITUDE, String.valueOf(lon));
-		long newRowId;
-		newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
-		Toast.makeText(getApplicationContext(),
-				"Data Stored in local db " + getCurrentTimeStamp(),
-				Toast.LENGTH_SHORT).show();
+		DataDbOperations dbOp = new DataDbOperations(v.getContext());
+		dbOp.initWrite();
+		dbOp.storeData();
 	}
 
 	public void loadLocalDb(View v) throws JSONException {
@@ -332,18 +308,18 @@ public class MainActivity extends Activity {
 		JSONObject jObject = new JSONObject();
 		DataDbOperations dbOp = new DataDbOperations(v.getContext());
 		DataBean data = new DataBean();
-		dbOp.initRead();
-		dbOp.moveCursorToFirst();
-		data = dbOp.getData();
-		jArray.put(createJsonObject(data));
-		while (!dbOp.isCursorLast()) {
-			dbOp.moveCursorNext();
+		if (dbOp.dataExists()) {
+			dbOp.moveCursorToFirst();
 			data = dbOp.getData();
 			jArray.put(createJsonObject(data));
+			while (!dbOp.isCursorLast()) {
+				dbOp.moveCursorNext();
+				data = dbOp.getData();
+				jArray.put(createJsonObject(data));
+			}
+			jObject.put("data", jArray);
+			System.out.println(jObject);
 		}
-		jObject.put("data", jArray);
-		System.out.println(jObject);
-
 	}
 
 	public void clearDb(View v) {

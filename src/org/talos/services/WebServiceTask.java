@@ -23,18 +23,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.talos.beans.DataBean;
+import org.talos.db.DataContract.DataEntry;
 import org.talos.db.DataDbHelper;
 import org.talos.db.DataDbOperations;
-import org.talos.db.DataContract.DataEntry;
 
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 public class WebServiceTask extends AsyncTask<String, Void, String> {
 
@@ -47,15 +42,17 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 	private int taskType = GET_TASK;
 	private Context mContext = null;
-	private String processMessage = "Processing...";
+	
+	@SuppressWarnings("unused")
+	private String response = "Response...";
 	private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
 
 	DataDbHelper mDbHelper;
 
-	public WebServiceTask(int taskType, Context mContext, String processMessage) {
+	public WebServiceTask(int taskType, Context mContext, String response) {
 		this.taskType = taskType;
 		this.mContext = mContext;
-		this.processMessage = processMessage;
+		this.response = response;
 	}
 
 	public void addNameValuePair(String name, String value) {
@@ -66,7 +63,6 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPreExecute() {
-
 	}
 
 	@Override
@@ -81,11 +77,9 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 		} else {
 			try {
 				result = inputStreamToString(response.getEntity().getContent());
-				System.out.println(result);
+//				System.out.println(result);
 
-			} catch (IllegalStateException e) {
-				Log.e(TAG, e.getLocalizedMessage(), e);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Log.e(TAG, e.getLocalizedMessage(), e);
 			}
 		}
@@ -94,15 +88,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPostExecute(String response) {
-		String message;
-		if (response.contains("Upload Succeed"))
-			message = "Upload Succeed";
-		else
-			message = "Upload Failed";
-		Toast toast = Toast.makeText(mContext, message,
-				Toast.LENGTH_SHORT);
-		toast.show();
-
+		System.out.println(response);
 	}
 
 	// Connection Establishment
@@ -129,21 +115,6 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 			case POST_TASK:
 				HttpPost httppost = new HttpPost(url);
-
-				// // Add parameters
-				// String entity = "{ \"data\":[ { \"" + params.get(0).getName()
-				// + "\":\"" + params.get(0).getValue() + "\", \""
-				// + params.get(1).getName() + "\":\""
-				// + params.get(1).getValue() + "\", \""
-				// + params.get(2).getName() + "\":\""
-				// + params.get(2).getValue() + "\", \""
-				// + params.get(3).getName() + "\":\""
-				// + params.get(3).getValue() + "\", \""
-				// + params.get(4).getName() + "\":\""
-				// + params.get(4).getValue() + "\", \""
-				// + params.get(5).getName() + "\":\""
-				// + params.get(5).getValue() + "\" } ] }";
-				// System.out.println(entity);
 				String entity = getEntity().toString();
 				System.out.println(entity);
 				StringEntity se = new StringEntity(entity);
@@ -151,22 +122,15 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 						"application/json"));
 				httppost.setHeader("Content-type", "application/json");
 				httppost.setEntity(se);
-
-				// httppost.setEntity(new UrlEncodedFormEntity(params));
-
 				response = httpclient.execute(httppost);
-				// System.out.println("****"+response);
 				break;
 			case GET_TASK:
 				HttpGet httpget = new HttpGet(url);
 				response = httpclient.execute(httpget);
-				// System.out.println("****"+response);
 				break;
 			}
 		} catch (Exception e) {
-
 			Log.e(TAG, e.getLocalizedMessage(), e);
-
 		}
 
 		return response;
@@ -208,13 +172,12 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 			jArray.put(createJsonObject(data));
 		}
 		result.put("data", jArray);
-		// System.out.println(result);
 		return result;
 	}
 
 	JSONObject createJsonObject(DataBean data) throws JSONException {
 		JSONObject result = new JSONObject();
-
+		//TODO To timestamp den pernaei stin vasi
 		result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
 		result.put(DataEntry.USER, data.getUser());
 		result.put(DataEntry.OPERATOR, data.getOperator());
@@ -222,7 +185,6 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 		result.put(DataEntry.CINR, data.getCinr());
 		result.put(DataEntry.LATITUDE, data.getLatitude());
 		result.put(DataEntry.LONGITUDE, data.getLongitude());
-		// System.out.println(result);
 		return result;
 	}
 

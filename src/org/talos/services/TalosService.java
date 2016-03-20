@@ -1,6 +1,9 @@
 package org.talos.services;
 
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.talos.activities.MainActivity;
 
 import com.example.signalandlocation.R;
@@ -10,9 +13,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -20,8 +26,10 @@ import android.location.LocationManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -33,7 +41,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 
-public class TestService extends Service implements LocationListener{
+public class TalosService extends Service implements LocationListener{
 	//broadcast strings
 	public static final String LOCATION_MESSAGE = "org.talos.services.LocationService.LOCATION_CHANGED";
 	public static final String LOCATION_RESULT = "org.talos.services.LocationService.REQUEST_PROCESSED";
@@ -45,9 +53,15 @@ public class TestService extends Service implements LocationListener{
     // indicates whether onRebind should be used
     boolean mAllowRebind; 
     
-    //locations
+    //static data fields
+    public static String activeUser;
+    public static String operatorName;
+    public static int signalStrength;
+    public static String networkType;
     public static float latitude;
     public static float longitude;
+    public static String serverIp;
+    
     
     //location listener
   	LocationManager locationManager;
@@ -57,15 +71,13 @@ public class TestService extends Service implements LocationListener{
   	TelephonyManager        Tel;
   	MyPhoneStateListener    SignalStrengthListener;
   	
-  	public static int signalStrength;
-  	public static String networkType;
-  	public static String operatorName;
+  	
   	
   	
   	
   	
 
-    public TestService() {
+    public TalosService() {
   
 	}
     
@@ -73,6 +85,7 @@ public class TestService extends Service implements LocationListener{
     public void onCreate() {
         // The service is being created
 //    	System.out.println("TestService:onCreate");
+		loadSettings();
     	
     	locationBroadcaster = LocalBroadcastManager.getInstance(this);
     	
@@ -296,4 +309,34 @@ public class TestService extends Service implements LocationListener{
     	
     	return result;
     }
+    
+	public static String getCurrentTimeStamp() {
+		try {
+
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"yyyy-MM-dd HH:mm:ss");
+			String currentTimeStamp = dateFormat.format(new Date()); // Find
+																		// todays
+																		// date
+
+			return currentTimeStamp;
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return null;
+		}
+	}
+	
+	public boolean loadSettings() {
+		SharedPreferences sharedPrefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		serverIp = sharedPrefs.getString(MainActivity.KEY_PREF_SERVER_IP, "");
+		activeUser = sharedPrefs.getString(MainActivity.KEY_PREF_ACTIVE_USER,
+				"");
+		return true;
+
+	}
+	
+		
+		
 }
