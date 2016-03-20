@@ -83,5 +83,11 @@
         android:layout_height="wrap_content"
         android:text="@string/button_previewData" 
         android:onClick="loadLocalDb"/>
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_deleteData" 
+        android:onClick="clearDb"/>
 
 </LinearLayout>

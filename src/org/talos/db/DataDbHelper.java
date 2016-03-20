@@ -8,20 +8,20 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataDbHelper extends SQLiteOpenHelper  {
 	
-	 public static final int DATABASE_VERSION = 3;   
+	 public static final int DATABASE_VERSION = 7;   
 	 public static final String DATABASE_NAME = "Data.db";
 	 private static final String TEXT_TYPE = " TEXT";
 	 private static final String COMMA_SEP = ",";
-	 private static final String SQL_CREATE_ENTRIES =
+	 static final String SQL_CREATE_ENTRIES =
 			 "CREATE TABLE " + DataEntry.TABLE_NAME + " (" +
 			 DataEntry.TIME_STAMP + " " + TEXT_TYPE + " PRIMARY KEY," +
 			 DataEntry.USER + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.OPERATOR + TEXT_TYPE + COMMA_SEP +
-			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.NETWORK_TYPE + TEXT_TYPE + COMMA_SEP +
+			 DataEntry.CINR + TEXT_TYPE + COMMA_SEP +
 			 DataEntry.LATITUDE + TEXT_TYPE + COMMA_SEP +	
 			 DataEntry.LONGITUDE + TEXT_TYPE + " )";
-	 private static final String SQL_DELETE_ENTRIES =   
+	 static final String SQL_DELETE_ENTRIES =   
 			 "DROP TABLE IF EXISTS " + DataEntry.TABLE_NAME;
 	 
 	 public DataDbHelper(Context context) {

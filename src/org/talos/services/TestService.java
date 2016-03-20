@@ -72,7 +72,7 @@ public class TestService extends Service implements LocationListener{
 	@Override
     public void onCreate() {
         // The service is being created
-    	System.out.println("TestService:onCreate");
+//    	System.out.println("TestService:onCreate");
     	
     	locationBroadcaster = LocalBroadcastManager.getInstance(this);
     	
@@ -102,7 +102,7 @@ public class TestService extends Service implements LocationListener{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // The service is starting, due to a call to startService()
-    	System.out.println("TestService:onStartCommand");
+//    	System.out.println("TestService:onStartCommand");
 	    locationManager.requestLocationUpdates(provider, 400, 1, this);
 	    notificationBuild();
     	return mStartMode;
@@ -111,14 +111,14 @@ public class TestService extends Service implements LocationListener{
     @Override
     public IBinder onBind(Intent intent) {
         // A client is binding to the service with bindService()
-    	System.out.println("TestService:bindService");
+//    	System.out.println("TestService:bindService");
         return mBinder;
     }
     
     @Override
     public boolean onUnbind(Intent intent) {
         // All clients have unbound with unbindService()
-    	System.out.println("TestService:unbindService");
+//    	System.out.println("TestService:unbindService");
         return mAllowRebind;
     }
     
@@ -126,13 +126,13 @@ public class TestService extends Service implements LocationListener{
     public void onRebind(Intent intent) {
         // A client is binding to the service with bindService(),
         // after onUnbind() has already been called
-    	System.out.println("TestService:rebindService");
+//    	System.out.println("TestService:rebindService");
     }
     
     @Override
     public void onDestroy() {
         // The service is no longer used and is being destroyed
-    	System.out.println("TestService:onDestroy");
+//    	System.out.println("TestService:onDestroy");
     	
     	locationManager.removeUpdates(this);
     	notificationDestroy();
@@ -142,7 +142,7 @@ public class TestService extends Service implements LocationListener{
 	public void onLocationChanged(Location location) {
 		latitude = (float) location.getLatitude();
 		longitude = (float) location.getLongitude();
-		System.out.println("Location changed");
+//		System.out.println("Location changed");
 		//Toast.makeText(getApplicationContext(), "Lat:"+latitude+" Lon:"+longtitude, Toast.LENGTH_SHORT).show();
 		broadcast();
 		
@@ -170,7 +170,7 @@ public class TestService extends Service implements LocationListener{
 		Intent intent = new Intent(LOCATION_RESULT);
 		//intent.putExtra(LOCATION_MESSAGE);
 		locationBroadcaster.sendBroadcastSync(intent);
-		System.out.println("Message Broadcasted from TestService");
+//		System.out.println("Message Broadcasted from TestService");
 	}
 	
 	private void checkGPSStatus (){

@@ -49,7 +49,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 	private Context mContext = null;
 	private String processMessage = "Processing...";
 	private ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-	
+
 	DataDbHelper mDbHelper;
 
 	public WebServiceTask(int taskType, Context mContext, String processMessage) {
@@ -82,6 +82,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 			try {
 				result = inputStreamToString(response.getEntity().getContent());
 				System.out.println(result);
+
 			} catch (IllegalStateException e) {
 				Log.e(TAG, e.getLocalizedMessage(), e);
 			} catch (IOException e) {
@@ -93,11 +94,15 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPostExecute(String response) {
-		/*
-		 * if (response!=null) { Context context = getApplicationContext();
-		 * CharSequence text = response; int duration = Toast.LENGTH_SHORT;
-		 * Toast toast = Toast.makeText(context, text,duration); toast.show(); }
-		 */
+		String message;
+		if (response.contains("Upload Succeed"))
+			message = "Upload Succeed";
+		else
+			message = "Upload Failed";
+		Toast toast = Toast.makeText(mContext, message,
+				Toast.LENGTH_SHORT);
+		toast.show();
+
 	}
 
 	// Connection Establishment
@@ -125,21 +130,23 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 			case POST_TASK:
 				HttpPost httppost = new HttpPost(url);
 
-				// Add parameters
-				String entity = "{ \"data\":[ { \"" + params.get(0).getName()
-						+ "\":\"" + params.get(0).getValue() + "\", \""
-						+ params.get(1).getName() + "\":\""
-						+ params.get(1).getValue() + "\", \""
-						+ params.get(2).getName() + "\":\""
-						+ params.get(2).getValue() + "\", \""
-						+ params.get(3).getName() + "\":\""
-						+ params.get(3).getValue() + "\", \""
-						+ params.get(4).getName() + "\":\""
-						+ params.get(4).getValue() + "\", \""
-						+ params.get(5).getName() + "\":\""
-						+ params.get(5).getValue() + "\" } ] }";
-				StringEntity se = new StringEntity(getEntity().toString());
+				// // Add parameters
+				// String entity = "{ \"data\":[ { \"" + params.get(0).getName()
+				// + "\":\"" + params.get(0).getValue() + "\", \""
+				// + params.get(1).getName() + "\":\""
+				// + params.get(1).getValue() + "\", \""
+				// + params.get(2).getName() + "\":\""
+				// + params.get(2).getValue() + "\", \""
+				// + params.get(3).getName() + "\":\""
+				// + params.get(3).getValue() + "\", \""
+				// + params.get(4).getName() + "\":\""
+				// + params.get(4).getValue() + "\", \""
+				// + params.get(5).getName() + "\":\""
+				// + params.get(5).getValue() + "\" } ] }";
+				// System.out.println(entity);
+				String entity = getEntity().toString();
 				System.out.println(entity);
+				StringEntity se = new StringEntity(entity);
 				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
 						"application/json"));
 				httppost.setHeader("Content-type", "application/json");
@@ -186,36 +193,37 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 		return total.toString();
 	}
 
-	public JSONObject getEntity() throws JSONException{
-    	JSONArray jArray = new JSONArray();
-    	JSONObject result = new JSONObject();
-    	DataDbOperations dbOp = new DataDbOperations(mContext);
-    	DataBean data = new DataBean();
-    	dbOp.initRead();
-    	dbOp.moveCursorToFirst();
-    	data = dbOp.getData();
-    	jArray.put(createJsonObject(data));
-    	while (!dbOp.isCursorLast()){
-    		dbOp.moveCursorNext();
-    		data = dbOp.getData();
-    		jArray.put(createJsonObject(data));
-    	}
-    	result.put("data",jArray );
-    	System.out.println(result);
-    	return result;
-    }
-    
-    JSONObject createJsonObject(DataBean data) throws JSONException{
-    	JSONObject result = new JSONObject();
-    	
-    	result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
-    	result.put(DataEntry.USER, data.getUser());
-    	result.put(DataEntry.OPERATOR, data.getOperator());
-    	result.put(DataEntry.CINR, data.getCinr());
-    	result.put(DataEntry.LATITUDE, data.getLatitude());
-    	result.put(DataEntry.LONGITUDE, data.getLongitude());
-//    	System.out.println(result);
-    	return result;
-    }
+	public JSONObject getEntity() throws JSONException {
+		JSONArray jArray = new JSONArray();
+		JSONObject result = new JSONObject();
+		DataDbOperations dbOp = new DataDbOperations(mContext);
+		DataBean data = new DataBean();
+		dbOp.initRead();
+		dbOp.moveCursorToFirst();
+		data = dbOp.getData();
+		jArray.put(createJsonObject(data));
+		while (!dbOp.isCursorLast()) {
+			dbOp.moveCursorNext();
+			data = dbOp.getData();
+			jArray.put(createJsonObject(data));
+		}
+		result.put("data", jArray);
+		// System.out.println(result);
+		return result;
+	}
+
+	JSONObject createJsonObject(DataBean data) throws JSONException {
+		JSONObject result = new JSONObject();
+
+		result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
+		result.put(DataEntry.USER, data.getUser());
+		result.put(DataEntry.OPERATOR, data.getOperator());
+		result.put(DataEntry.NETWORK_TYPE, data.getNetworkType());
+		result.put(DataEntry.CINR, data.getCinr());
+		result.put(DataEntry.LATITUDE, data.getLatitude());
+		result.put(DataEntry.LONGITUDE, data.getLongitude());
+		// System.out.println(result);
+		return result;
+	}
 
 }

@@ -4,7 +4,6 @@ import org.talos.beans.DataBean;
 import org.talos.db.DataContract.DataEntry;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -19,7 +18,7 @@ public class DataDbOperations {
 	public void initRead() {
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
 		String[] projection = { DataEntry.TIME_STAMP, DataEntry.USER,
-				DataEntry.OPERATOR, DataEntry.CINR, DataEntry.LATITUDE,
+				DataEntry.OPERATOR, DataEntry.NETWORK_TYPE, DataEntry.CINR, DataEntry.LATITUDE,
 				DataEntry.LONGITUDE };
 		String sortOrder = DataEntry.TIME_STAMP + " DESC";
 
@@ -41,6 +40,8 @@ public class DataDbOperations {
 				.getColumnIndexOrThrow(DataEntry.USER)));
 		result.setOperator(cursor.getString(cursor
 				.getColumnIndexOrThrow(DataEntry.OPERATOR)));
+		result.setNetworkType(cursor.getString(cursor
+				.getColumnIndexOrThrow(DataEntry.NETWORK_TYPE)));
 		result.setCinr(cursor.getString(cursor
 				.getColumnIndexOrThrow(DataEntry.CINR)));
 		result.setLatitude(cursor.getString(cursor
@@ -66,6 +67,12 @@ public class DataDbOperations {
 
 	public boolean moveCursorToLast() {
 		return cursor.moveToLast();
+	}
+
+	public void clearData() {
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		db.execSQL(DataDbHelper.SQL_DELETE_ENTRIES);
+		db.execSQL(DataDbHelper.SQL_CREATE_ENTRIES);
 	}
 
 }

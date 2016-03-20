@@ -4,6 +4,7 @@ public class DataBean {
 	String timeStamp;
 	String user;
 	String operator;
+	String networkType;
 	String cinr;
 	String latitude;
 	String longitude;
@@ -30,6 +31,12 @@ public class DataBean {
 	}
 	public void setOperator(String operator) {
 		this.operator = operator;
+	}
+	public String getNetworkType(){
+		return networkType;
+	}
+	public void setNetworkType(String networkType){
+		this.networkType = networkType;
 	}
 	public String getCinr() {
 		return cinr;
