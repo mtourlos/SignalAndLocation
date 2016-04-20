@@ -41,7 +41,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 	public static final String TAG = "WebServiceTask";
 
 	private int taskType = GET_TASK;
-	private Context mContext = null;
+	private Context context = null;
 	
 	@SuppressWarnings("unused")
 	private String response = "Response...";
@@ -49,9 +49,9 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 
 	DataDbHelper mDbHelper;
 
-	public WebServiceTask(int taskType, Context mContext, String response) {
+	public WebServiceTask(int taskType, Context context, String response) {
 		this.taskType = taskType;
-		this.mContext = mContext;
+		this.context = context;
 		this.response = response;
 	}
 
@@ -118,8 +118,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 				String entity = getEntity().toString();
 				System.out.println(entity);
 				StringEntity se = new StringEntity(entity);
-				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-						"application/json"));
+				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,"application/json"));
 				httppost.setHeader("Content-type", "application/json");
 				httppost.setEntity(se);
 				response = httpclient.execute(httppost);
@@ -160,7 +159,7 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 	public JSONObject getEntity() throws JSONException {
 		JSONArray jArray = new JSONArray();
 		JSONObject result = new JSONObject();
-		DataDbOperations dbOp = new DataDbOperations(mContext);
+		DataDbOperations dbOp = new DataDbOperations(context);
 		DataBean data = new DataBean();
 		dbOp.initRead();
 		dbOp.moveCursorToFirst();

@@ -24,6 +24,6 @@
     <string name="cancel">Cancel</string>
     
     <string name="default_user">miket</string>
-    <string name="default_ip_server">192.168.2.11</string>
+    <string name="default_ip_server">192.168.1.2</string>
 
 </resources>

@@ -2,6 +2,7 @@ package org.talos.activities;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,21 +11,23 @@ import org.talos.beans.DataBean;
 import org.talos.db.DataContract.DataEntry;
 import org.talos.db.DataDbHelper;
 import org.talos.db.DataDbOperations;
+import org.talos.operations.UploadData;
 import org.talos.services.TalosService;
-import org.talos.services.WebServiceTask;
+import org.talos.services.TalosService.TalosBinder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
@@ -32,7 +35,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.signalandlocation.R;
 
@@ -71,9 +73,11 @@ public class MainActivity extends Activity {
 
 	// dbHelper
 	DataDbHelper mDbHelper;
+	
+	TalosService mService;
+    boolean mBound = false;
+    ServiceConnection serviceConnection;
 
-	// test
-	TalosService ts = new TalosService();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -211,14 +215,12 @@ public class MainActivity extends Activity {
 	 * Sends single Data to Server
 	 * 
 	 * @param v
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
-	public void sData(View v) {
-
-		WebServiceTask wst = new WebServiceTask(WebServiceTask.POST_TASK, this,
-				response);
-
-		wst.execute("http://" + serverIp
-				+ ":8080/TalosServer/service/userservice/datas");
+	public void sData(View v) throws InterruptedException, ExecutionException {		
+		UploadData upOp = new UploadData(getApplicationContext());
+		upOp.uploadData();
 	}
 
 	/**
@@ -228,8 +230,10 @@ public class MainActivity extends Activity {
 	 */
 
 	public void startService(View v) {
-		Intent intent = new Intent(this, TalosService.class);
-		startService(intent);
+		Intent serviceIntent = new Intent(this, TalosService.class);
+		startService(serviceIntent);
+//		serviceConnection = getServiceConnection();
+//		bindService(serviceIntent, serviceConnection, Context.BIND_DEBUG_UNBIND);
 	}
 
 	/**
@@ -238,8 +242,8 @@ public class MainActivity extends Activity {
 	 * @param v
 	 */
 	public void stopService(View v) {
-		Intent intent = new Intent(this, TalosService.class);
-		stopService(intent);
+		Intent serviceIntent = new Intent(this, TalosService.class);
+		stopService(serviceIntent);
 	}
 
 	/**
@@ -248,23 +252,18 @@ public class MainActivity extends Activity {
 	 */
 	private void checkGPSStatus() {
 		LocationManager lmService = (LocationManager) getSystemService(LOCATION_SERVICE);
-		boolean enabled = lmService
-				.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		boolean enabled = lmService.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		if (!enabled) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.main_alerDialog_message).setTitle(
-					R.string.main_alerDialog_title);
-			builder.setPositiveButton(R.string.enable,
-					new DialogInterface.OnClickListener() {
+			builder.setMessage(R.string.main_alerDialog_message).setTitle(R.string.main_alerDialog_title);
+			builder.setPositiveButton(R.string.enable,new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// User clicked OK button
-							Intent intent = new Intent(
-									Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+							Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 							startActivity(intent);
 						}
 					});
-			builder.setNegativeButton(R.string.cancel,
-					new DialogInterface.OnClickListener() {
+			builder.setNegativeButton(R.string.cancel,new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// User cancelled the dialog
 							System.exit(0);
@@ -275,28 +274,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Stores pilot Data for test
-	 * 
-	 * @param v
-	 */
-//	public void storePilotData(View v) {
-//		SQLiteDatabase db = mDbHelper.getWritableDatabase();
-//		ContentValues values = new ContentValues();
-//		values.put(DataEntry.TIME_STAMP, getCurrentTimeStamp());
-//		values.put(DataEntry.USER, activeUser);
-//		values.put(DataEntry.OPERATOR, operatorName);
-//		values.put(DataEntry.CINR, signalStrength);
-//		values.put(DataEntry.NETWORK_TYPE, networkType);
-//		values.put(DataEntry.LATITUDE, String.valueOf(lat));
-//		values.put(DataEntry.LONGITUDE, String.valueOf(lon));
-//		long newRowId;
-//		newRowId = db.insert(DataEntry.TABLE_NAME, null, values);
-//		Toast.makeText(getApplicationContext(),
-//				"Data Stored in local db " + getCurrentTimeStamp(),
-//				Toast.LENGTH_SHORT).show();
-//	}
-	
 	public void storePilotData(View v) {
 		DataDbOperations dbOp = new DataDbOperations(v.getContext());
 		dbOp.initWrite();
@@ -347,11 +324,29 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void updateOperatorDetailsUI(int signalStrength,
-			String networkType, String operatorName) {
+	private void updateOperatorDetailsUI(int signalStrength,String networkType, String operatorName) {
 		signalStrengthField.setText("Signal strength: " + signalStrength);
 		networkTypeField.setText("Network type: " + networkType);
 		operatorNameField.setText("Operator name: " + operatorName);
 	}
+	
+	private ServiceConnection getServiceConnection(){
+		ServiceConnection serviceConnection = new ServiceConnection() {
 
+			@Override
+			public void onServiceConnected(ComponentName className,IBinder service) {
+				TalosBinder binder = (TalosBinder) service;
+				mService = binder.getService();
+				mBound = true;
+			}
+
+			@Override
+			public void onServiceDisconnected(ComponentName arg0) {
+				mBound = false;
+			}
+		};
+		return serviceConnection;
+	}
+	
+	 
 }
