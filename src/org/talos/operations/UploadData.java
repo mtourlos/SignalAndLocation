@@ -29,10 +29,9 @@ public class UploadData {
 			if (response.contains("Upload Suc")) {
 				dbOp.clearData();
 				Toast.makeText(context, "Upload Suceed", Toast.LENGTH_LONG).show();
+			}else{
+				Toast.makeText(context, "Upload Failed", Toast.LENGTH_LONG).show();
 			}
-			// else
-			// Toast.makeText(context, status, Toast.LENGTH_LONG).show();
-			// TODO Create toast for upload fail
 		}
 	} 
 
