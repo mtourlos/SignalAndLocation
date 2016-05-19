@@ -148,6 +148,10 @@ public class TalosService extends Service implements LocationListener {
 		// System.out.println("Location changed");
 		// Toast.makeText(getApplicationContext(),
 		// "Lat:"+latitude+" Lon:"+longtitude, Toast.LENGTH_SHORT).show();
+		DataDbOperations dbOp = new DataDbOperations(this);
+		dbOp.initWrite();
+		dbOp.storeData();
+		dbOp.close();
 		broadcast();
 
 	}

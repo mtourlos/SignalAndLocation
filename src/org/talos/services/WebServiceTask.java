@@ -171,12 +171,12 @@ public class WebServiceTask extends AsyncTask<String, Void, String> {
 			jArray.put(createJsonObject(data));
 		}
 		result.put("data", jArray);
+		dbOp.close();
 		return result;
 	}
 
 	JSONObject createJsonObject(DataBean data) throws JSONException {
 		JSONObject result = new JSONObject();
-		//TODO To timestamp den pernaei stin vasi
 		result.put(DataEntry.TIME_STAMP, data.getTimeStamp());
 		result.put(DataEntry.USER, data.getUser());
 		result.put(DataEntry.OPERATOR, data.getOperator());

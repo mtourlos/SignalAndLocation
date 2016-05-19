@@ -104,5 +104,9 @@ public class DataDbOperations {
 		db.execSQL(DataDbHelper.SQL_DELETE_ENTRIES);
 		db.execSQL(DataDbHelper.SQL_CREATE_ENTRIES);
 	}
+	
+	public void close(){
+		db.close();
+	}
 
 }

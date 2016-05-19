@@ -33,6 +33,6 @@ public class UploadData {
 				Toast.makeText(context, "Upload Failed", Toast.LENGTH_LONG).show();
 			}
 		}
-	} 
+	}
 
 }
